@@ -1,31 +1,50 @@
+import keras
 import numpy as np
-import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Embedding, LSTM, Dense
+from keras.layers import Embedding, LSTM, Dense, Dropout
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+
 from Loader import load_dataset
 
 if __name__ == '__main__':
-    train, validation, test = load_dataset()
+    dataset = load_dataset()
+    train_set, val_set, test_set = dataset['train'], dataset['val'], dataset['test']
 
-    # Tokenization and padding example using TensorFlow's Tokenizer
-    tokenizer = tf.keras.preprocessing.text.Tokenizer()
-    tokenizer.fit_on_texts(train.utterances)
-    utterances_sequences = tokenizer.texts_to_sequences(train.utterances)
-    utterances_padded = tf.keras.preprocessing.sequence.pad_sequences(utterances_sequences)
+    # Conversion between labels and numeric values
+    emotion_labels = {'anger': 0, 'sadness': 1, 'fear': 2, 'neutral': 3, 'joy': 4, 'surprise': 5, 'disgust': 6}
 
-    # Convert emotion labels to numerical values
-    emotion_labels = {'neutral': 0, 'sad': 1, 'surprised': 2, 'happy': 3}  # Add more as needed
-    emotions_numeric = np.array([emotion_labels[emotion] for emotion in train.emotions])
+    train_set['emotions_numeric'] = np.array([emotion_labels[emotion] for emotion in train_set['emotions']])
+    val_set['emotions_numeric'] = np.array([emotion_labels[emotion] for emotion in val_set['emotions']])
+    test_set['emotions_numeric'] = np.array([emotion_labels[emotion] for emotion in test_set['emotions']])
 
-    # Define the model
+    # Tokenization
+    tokenizer = Tokenizer()
+    tokenizer.fit_on_texts(train_set['utterances'])
+
+    train_sequences = tokenizer.texts_to_sequences(train_set['utterances'])
+    val_sequences = tokenizer.texts_to_sequences(val_set['utterances'])
+    test_sequences = tokenizer.texts_to_sequences(test_set['utterances'])
+
+    # Padding
+    train_padded = pad_sequences(train_sequences)
+    val_padded = pad_sequences(val_sequences)
+    test_padded = pad_sequences(test_sequences)
+
+    # Model Definition
     model = Sequential()
-    model.add(Embedding(input_dim=len(tokenizer.word_index) + 1, output_dim=128, input_length=utterances_padded.shape[1]))
+    model.add(Embedding(input_dim=len(tokenizer.word_index) + 1, output_dim=128, input_length=train_padded.shape[1]))
     model.add(LSTM(128))
+    model.add(Dropout(0.25))
     model.add(Dense(64, activation='relu'))
+    model.add(Dropout(0.25))
     model.add(Dense(len(emotion_labels), activation='softmax'))
 
-    # Compile the model
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
-    # Train the model
-    model.fit(utterances_padded, emotions_numeric, epochs=10, validation_split=0.2)
+    # Training
+    model.fit(train_padded, train_set['emotions_numeric'], epochs=5, batch_size=32)
+
+    # Results
+    test_loss, test_accuracy = model.evaluate(test_padded, test_set['emotions_numeric'])
+    print(f'Test Accuracy: {test_accuracy * 100:.2f}%')
