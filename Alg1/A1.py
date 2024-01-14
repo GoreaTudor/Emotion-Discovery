@@ -4,8 +4,6 @@ from keras.models import Sequential
 from keras.layers import Embedding, LSTM, Dense
 from Loader import load_dataset
 
-# Load dataset
-# episodes, speakers, emotions, utterances, triggers = load_data()
 if __name__ == '__main__':
     train, validation, test = load_dataset()
 

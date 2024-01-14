@@ -8,37 +8,37 @@ def load_data_from_json(json_path):
 
 
 def load_dataset():
-    train_path = '../Data/MELD_train_efr.json'
-    val_path = '../Data/MELD_val_efr.json'
-    test_path = '../Data/MELD_test_efr.json'
+    train_path = 'Data/MELD_train_efr.json'
+    val_path = 'Data/MELD_val_efr.json'
+    test_path = 'Data/MELD_test_efr.json'
     return load_dataset_custom_paths(train_path, val_path, test_path)
 
 
 def load_dataset_custom_paths(training_path, validation_path, testing_path):
+    def extract_fields(data):
+        utterances = []
+        emotions = []
+        emotions_UQ = set()  # using set to get unique
+        triggers = []
+
+        for episode in data:
+            utterances.extend(episode['utterances'])
+            emotions.extend(episode['emotions'])
+            emotions_UQ.update(episode['emotions'])
+            # triggers.extend(episode['triggers'])
+
+        return {'utterances': utterances, 'emotions': emotions, 'triggers': triggers, 'unique-emotions': emotions_UQ}
+
     # Load training data
-    train_data = load_data_from_json(training_path)
-    train_episodes = train_data['episodes']
-    train_speakers = train_data['speakers']
-    train_emotions = train_data['emotions']
-    train_utterances = train_data['utterances']
-    train_triggers = train_data['triggers']
+    raw_train_data = load_data_from_json(training_path)
+    train_data = extract_fields(raw_train_data)
 
     # Load validation data
-    val_data = load_data_from_json(validation_path)
-    val_episodes = val_data['episodes']
-    val_speakers = val_data['speakers']
-    val_emotions = val_data['emotions']
-    val_utterances = val_data['utterances']
-    val_triggers = val_data['triggers']
+    raw_val_data = load_data_from_json(validation_path)
+    val_data = extract_fields(raw_val_data)
 
     # Load test data
-    test_data = load_data_from_json(testing_path)
-    test_episodes = test_data['episodes']
-    test_speakers = test_data['speakers']
-    test_emotions = test_data['emotions']
-    test_utterances = test_data['utterances']
-    test_triggers = test_data['triggers']
+    raw_test_data = load_data_from_json(testing_path)
+    test_data = extract_fields(raw_test_data)
 
-    return (train_episodes, train_speakers, train_emotions, train_utterances, train_triggers), \
-           (val_episodes, val_speakers, val_emotions, val_utterances, val_triggers), \
-           (test_episodes, test_speakers, test_emotions, test_utterances, test_triggers)
+    return {'train': train_data, 'val': val_data, 'test': test_data}
