@@ -1,4 +1,3 @@
-import keras
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Embedding, LSTM, Dense, Dropout
@@ -27,9 +26,11 @@ if __name__ == '__main__':
     test_sequences = tokenizer.texts_to_sequences(test_set['utterances'])
 
     # Padding
-    train_padded = pad_sequences(train_sequences)
-    val_padded = pad_sequences(val_sequences)
-    test_padded = pad_sequences(test_sequences)
+    max_sequence_length = max(len(seq) for seq in train_sequences)
+
+    train_padded = pad_sequences(train_sequences, maxlen=max_sequence_length)
+    val_padded = pad_sequences(val_sequences, maxlen=max_sequence_length)
+    test_padded = pad_sequences(test_sequences, maxlen=max_sequence_length)
 
     # Model Definition
     model = Sequential()
@@ -43,7 +44,8 @@ if __name__ == '__main__':
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
 
     # Training
-    model.fit(train_padded, train_set['emotions_numeric'], epochs=5, batch_size=32)
+    model.fit(train_padded, train_set['emotions_numeric'], epochs=5, batch_size=32,
+              validation_data=(val_padded, val_set['emotions_numeric']))
 
     # Results
     test_loss, test_accuracy = model.evaluate(test_padded, test_set['emotions_numeric'])
