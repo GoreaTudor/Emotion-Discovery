@@ -8,9 +8,9 @@ import random
 
 from torch.utils import data
 
-our_training_path = "../../../noje cel frumos/Emotion-Discovery/ALG2/Data/meld-fr_partial_train.csv"
-our_testing_path = "../../../noje cel frumos/Emotion-Discovery/ALG2/Data/meld-fr_partial_test.csv"
-save_path = "C:\\Users\\catal\\PycharmProjects\\testProiect\\Emotion-Flip-Reasoning\\Pickles\\"
+our_training_path = "..\\Data\\meld-fr_partial_train.csv"
+our_testing_path = "..\\Data\\meld-fr_partial_test.csv"
+save_path = "..\\Pickles\\"
 
 our_training_csv = pd.read_csv(our_training_path)
 our_testing_csv = pd.read_csv(our_testing_path)

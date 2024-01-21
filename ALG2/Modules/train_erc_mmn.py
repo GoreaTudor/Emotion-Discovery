@@ -3,6 +3,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils import data
+from sklearn.metrics import f1_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
 from models import ERC_MMN
 from pickle_loader import load_erc
@@ -23,6 +26,8 @@ idx2utt, utt2idx, idx2emo, emo2idx, idx2speaker,\
 
 weight_matrix = weight_matrix.to(device)
 train_cnt = len(my_dataset_train)
+
+print(train_cnt)
 
 def get_train_test_loader(bs):
     train_data_iter = data.DataLoader(my_dataset_train,batch_size=bs)
@@ -78,16 +83,15 @@ def train(model, train_data_loader, epochs):
             loss.backward()
             optimizer.step()
 
-        # avg_loss /= len(train_data_loader)
+        avg_loss /= len(train_data_loader)
         print("Average Loss = ",avg_loss)
 
     return model
+
 
 
 model = ERC_MMN(hidden_size,weight_matrix,utt2idx,batch_size,seq_len).to(device)
 weights1 = [1.0]*7
 data_iter_train, data_iter_test = get_train_test_loader(batch_size)
 
-print(weight_matrix)
-
-model = train(model, data_iter_train, epochs = 15)
+model = train(model, data_iter_train, epochs = 5)
