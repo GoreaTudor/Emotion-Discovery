@@ -5,9 +5,9 @@ import pickle
 import nlp_utils as nu
 from torch.utils import data
 
-pickle_path = "C:\\Users\\catal\\PycharmProjects\\testProiect\\Emotion-Flip-Reasoning\\Pickles\\"
-our_training_path = "../../../noje cel frumos/Emotion-Discovery/ALG2/Data/meld-fr_partial_train.csv"
-our_testing_path = "../../../noje cel frumos/Emotion-Discovery/ALG2/Data/meld-fr_partial_test.csv"
+pickle_path = "..\\Pickles\\"
+our_training_path = "..\\Data\\meld-fr_partial_train.csv"
+our_testing_path = "..\\Data\\meld-fr_partial_test.csv"
 save_path = pickle_path
 
 our_training_csv = pd.read_csv(our_training_path)
